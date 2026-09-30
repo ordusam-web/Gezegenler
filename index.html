@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarp'ın Gerçekçi Uzay Macerası</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #000; 
+            background-image: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow: hidden; 
+            touch-action: manipulation;
+        }
+
+        #header {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        h1 { margin: 0; font-size: 32px; color: #f1c40f; text-shadow: 0 0 10px #000; }
+        p { font-size: 18px; margin-top: 5px; color: #dff9fb; text-shadow: 1px 1px 5px #000; }
+
+        .solar-system { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        /* Yörünge Çizgileri - Sadece görseldir, tıklamayı asla engellemez */
+        .orbit-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px dashed rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Gezegen Taşıyıcıları - Dönme hareketini yapar */
+        .spinner {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            transform: translate(-50%, -50%);
+            animation: spin linear infinite;
+            pointer-events: none; /* Taşıyıcı tıklanmaz */
+        }
+
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes moonSpin { 100% { transform: rotate(360deg); } }
+
+        /* Gezegenler - Tıklanabilir */
+        .planet {
+            position: absolute;
+            top: 50%;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto; /* Sadece gezegen tıklanabilir */
+            transform: translate(-50%, -50%);
+            background-size: cover;
+            background-position: center;
+            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.3);
+            transition: transform 0.2s;
+        }
+        .planet:hover { transform: translate(-50%, -50%) scale(1.5); z-index: 50; }
+
+        /* Güneş */
+        .sun {
+            width: 12vmin; height: 12vmin;
+            background-color: #f39c12;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg');
+            box-shadow: 0 0 50px #f39c12, 0 0 80px #e67e22;
+        }
+        .sun:hover { transform: translate(-50%, -50%) scale(1.1); }
+
+        /* Merkür (Çap: 20vmin, Yarıçap: 10vmin) */
+        .r-mercury { width: 20vmin; height: 20vmin; }
+        .spin-mercury { animation-duration: 8s; z-index: 9;}
+        .mercury { left: calc(50% + 10vmin); width: 3vmin; height: 3vmin; background-color: #7f8c8d; background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg'); }
+
+        /* Venüs (Çap: 30vmin, Yarıçap: 15vmin) */
+        .r-venus { width: 30vmin; height: 30vmin; }
+        .spin-venus { animation-duration: 14s; z-index: 8;}
+        .venus { left: calc(50% + 15vmin); width: 4.5vmin; height: 4.5vmin; background-color: #e67e22; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg'); }
+
+        /* Dünya Sistemi (Çap: 42vmin, Yarıçap: 21vmin) */
+        .r-earth { width: 42vmin; height: 42vmin; }
+        .spin-earth { animation-duration: 20s; z-index: 7;}
+        .earth-system { position: absolute; left: calc(50% + 21vmin); top: 50%; transform: translate(-50%, -50%); width: 0; height: 0; }
+        .earth { left: 0; width: 5vmin; height: 5vmin; background-color: #2980b9; background-image: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg'); }
+        /* Ay Sistemi */
+        .moon-spinner { position: absolute; animation: moonSpin 4s linear infinite; width: 0; height: 0; pointer-events: none; }
+        .moon { left: 5vmin; top: 0; width: 1.5vmin; height: 1.5vmin; background-color: #bdc3c7; background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg'); }
+
+        /* Mars (Çap: 54vmin, Yarıçap: 27vmin) */
+        .r-mars { width: 54vmin; height: 54vmin; }
+        .spin-mars { animation-duration: 28s; z-index: 6;}
+        .mars { left: calc(50% + 27vmin); width: 4vmin; height: 4vmin; background-color: #c0392b; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg'); }
+
+        /* Jüpiter (Çap: 74vmin, Yarıçap: 37vmin) */
+        .r-jupiter { width: 74vmin; height: 74vmin; }
+        .spin-jupiter { animation-duration: 50s; z-index: 5;}
+        .jupiter { left: calc(50% + 37vmin); width: 9vmin; height: 9vmin; background-color: #d35400; background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg'); }
+
+        /* Satürn (Çap: 94vmin, Yarıçap: 47vmin) */
+        .r-saturn { width: 94vmin; height: 94vmin; }
+        .spin-saturn { animation-duration: 70s; z-index: 4;}
+        .saturn { left: calc(50% + 47vmin); width: 7.5vmin; height: 7.5vmin; background-color: #e1b12c; background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg'); }
+        
+        /* Uranüs (Çap: 110vmin, Yarıçap: 55vmin) */
+        .r-uranus { width: 110vmin; height: 110vmin; }
+        .spin-uranus { animation-duration: 90s; z-index: 3;}
+        .uranus { left: calc(50% + 55vmin); width: 5.5vmin; height: 5.5vmin; background-color: #22a6b3; background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg'); }
+
+        /* Neptün (Çap: 126vmin, Yarıçap: 63vmin) */
+        .r-neptune { width: 126vmin; height: 126vmin; }
+        .spin-neptune { animation-duration: 110s; z-index: 2;}
+        .neptune { left: calc(50% + 63vmin); width: 5.5vmin; height: 5.5vmin; background-color: #1e272e; background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg'); }
+
+
+        /* İnceleme Ekranı */
+        #surface-view {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            text-align: center;
+            padding: 20px;
+        }
+        #surface-view.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #surface-image {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.2), inset -20px -20px 40px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
+            animation: slowSpin 30s linear infinite;
+        }
+        @keyframes slowSpin { 100% { transform: rotate(360deg); } }
+
+        #surface-title { font-size: 50px; margin: 0 0 10px 0; color: #fff; }
+        #surface-desc { font-size: 24px; max-width: 600px; line-height: 1.4; color: #dff9fb; }
+        
+        .back-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #900000;
+        }
+        .back-btn:active { transform: translateY(5px); box-shadow: 0 0 0 #900000; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>Sarp'ın Uzay Macerası</h1>
+        <p>Gezegenleri daha yakından görmek için tıkla!</p>
+    </div>
+
+    <div class="solar-system">
+        
+        <!-- Yörünge Çizgileri -->
+        <div class="orbit-ring r-mercury"></div>
+        <div class="orbit-ring r-venus"></div>
+        <div class="orbit-ring r-earth"></div>
+        <div class="orbit-ring r-mars"></div>
+        <div class="orbit-ring r-jupiter"></div>
+        <div class="orbit-ring r-saturn"></div>
+        <div class="orbit-ring r-uranus"></div>
+        <div class="orbit-ring r-neptune"></div>
+
+        <!-- Güneş -->
+        <div class="planet sun" onclick="incele('Güneş', 'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg', 'Güneş kocaman bir ateş topudur! İçinde devasa alevler dans eder ve hepimizi ısıtır.')"></div>
+        
+        <!-- Gezegenler -->
+        <div class="spinner spin-mercury">
+            <div class="planet mercury" onclick="incele('Merkür', 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg', 'Güneşe en yakın minik gezegen! Tıpkı Ay gibi üstü çukurlarla dolu.')"></div>
+        </div>
+
+        <div class="spinner spin-venus">
+            <div class="planet venus" onclick="incele('Venüs', 'https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg', 'Çok ama çok sıcak bir gezegen! Etrafı kalın bulutlarla çevrili olduğu için çok parlaktır.')"></div>
+        </div>
+
+        <div class="spinner spin-earth">
+            <div class="earth-system">
+                <div class="planet earth" onclick="incele('Dünya', 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg', 'Evimiz! Uzaydan kocaman mavi bir bilye gibi görünür. Denizleri, ağaçları ve hayvanları var.')"></div>
+                <div class="moon-spinner">
+                    <div class="planet moon" onclick="incele('Ay', 'https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg', 'Dünya\'nın arkadaşı Ay! Üstünde hala eski astronotların ayak izleri duruyor.')"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spinner spin-mars">
+            <div class="planet mars" onclick="incele('Mars', 'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg', 'Kızıl gezegen Mars! Demir pasları yüzünden her yer kıpkırmızıdır. Üstünde tekerlekli robotlar dolaşır.')"></div>
+        </div>
+
+        <div class="spinner spin-jupiter">
+            <div class="planet jupiter" onclick="incele('Jüpiter', 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 'En kocaman dev gezegen! Üstündeki çizgiler aslında devasa rüzgar fırtınalarıdır.')"></div>
+        </div>
+
+        <div class="spinner spin-saturn">
+            <div class="planet saturn" onclick="incele('Satürn', 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg', 'Etrafındaki kocaman halkası buz ve kaya parçalarından oluşur. Çok havalı değil mi?')"></div>
+        </div>
+
+        <div class="spinner spin-uranus">
+            <div class="planet uranus" onclick="incele('Uranüs', 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg', 'Buz devi Uranüs! Uzayda yuvarlanan bir top gibi yan yatarak döner ve çok soğuktur.')"></div>
+        </div>
+
+        <div class="spinner spin-neptune">
+            <div class="planet neptune" onclick="incele('Neptün', 'https://upload.wikimedia.org/wikipedia/commons/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg', 'Güneşe en uzak gezegen. Harika bir mavi rengi var ve orada müthiş rüzgarlar esiyor!')"></div>
+        </div>
+    </div>
+
+    <!-- İnceleme Ekranı -->
+    <div id="surface-view">
+        <div id="surface-image"></div>
+        <h2 id="surface-title"></h2>
+        <p id="surface-desc"></p>
+        <button class="back-btn" onclick="geriDon()">🚀 Uzaya Geri Dön</button>
+    </div>
+
+    <script>
+        function konus(metin) {
+            window.speechSynthesis.cancel(); 
+            let ses = new SpeechSynthesisUtterance(metin);
+            ses.lang = 'tr-TR';
+            ses.rate = 0.85; 
+            ses.pitch = 1.1; 
+            window.speechSynthesis.speak(ses);
+        }
+
+        function incele(ad, resimUrl, aciklama) {
+            konus(ad);
+            document.getElementById('surface-image').style.backgroundImage = "url('" + resimUrl + "')";
+            document.getElementById('surface-title').innerText = ad;
+            document.getElementById('surface-desc').innerText = aciklama;
+            document.getElementById('surface-view').classList.add('active');
+        }
+
+        function geriDon() {
+            document.getElementById('surface-view').classList.remove('active');
+            window.speechSynthesis.cancel(); 
+        }
+    </script>
+</body>
+</html>
